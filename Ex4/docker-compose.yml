@@ -1,0 +1,36 @@
+version: '3' 
+services:
+  database:
+    hostname: database
+    image: postgres
+    env_file:
+      - ./.env
+    volumes:
+      - './sql:/docker-entrypoint-initdb.d/'
+    networks:
+      - 'swarm-net'
+
+  script:
+    hostname: script
+    volumes:
+      - './docker_swarm:/var/www/docker_swarm'
+    image: script4
+    depends_on:
+      - 'database'
+    networks:
+      - 'swarm-net'
+
+  http:
+    hostname: http
+    image: nginx
+    ports:
+      - '8080:80'
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - 'script'
+    networks:
+      - 'swarm-net'
+
+networks:
+	swarm-net:

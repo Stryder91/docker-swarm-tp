@@ -1,0 +1,36 @@
+version: '3'
+services:
+  app:
+    image: nginx
+    hostname: http
+    ports:
+      - '8080:80'
+    volumes:
+      - ./config/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - ruby-script
+    networks:
+      - 'ruby-net'
+  ruby-script:
+    hostname: ruby-script
+    env_file:
+      - ./config/environments/.env
+			- ./config/environments/.env.development.local
+    image: exo5
+    depends_on:
+      - 'db'
+    networks:
+      - 'ruby-net'
+  db:
+    image: mysql
+    hostname: db
+    ports:
+      - '32000:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./config/database:/docker-entrypoint-initdb.d/:ro
+    networks:
+      - 'ruby-net'
+networks:
+  ruby-net:
